@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <rect width="300" height="300" fill="#25212c"/>
+  <circle cx="150" cy="150" r="110" fill="none" stroke="#554457" stroke-width="2"/>
+  <circle cx="150" cy="150" r="86" fill="none" stroke="#80646c" stroke-width="2"/>
+  <circle cx="150" cy="150" r="62" fill="none" stroke="#c5918b" stroke-width="2"/>
+  <path d="M40 174h54l15-58 22 100 30-140 24 98h75" fill="none" stroke="#ffac88" stroke-width="5" stroke-linejoin="round"/>
+  <text x="28" y="38" font-family="Arial,sans-serif" font-size="12" letter-spacing="3" fill="#ece4dc">AFTER HOURS</text>
+  <text x="28" y="276" font-family="Arial,sans-serif" font-size="10" letter-spacing="2" fill="#b8a3b1">BEAST SESSIONS / 01</text>
+</svg>

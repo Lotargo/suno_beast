@@ -18,10 +18,32 @@ window.chrome = {runtime:{async sendMessage(message){
  if(message.type==='reset-folder'){previewState.outputMode='browser';previewState.outputDir='';}
  if(message.type==='link-existing')previewState.notice='Уже в коллекции: Sonata — Изиг Мунуш.mp3';
  if(message.type==='close-panel')window.parent.postMessage({type:'preview-close-panel'},location.origin);
- if(previewState.playback?.playing)previewState.playback.currentTime=Math.min(207.2,72.4+(Date.now()-previewStarted)/1000);
+ if(previewState.playback?.playing&&!docsView)previewState.playback.currentTime=Math.min(207.2,72.4+(Date.now()-previewStarted)/1000);
  return {ok:true,data:{...previewState}};
 }},storage:{local:{async get(defaults){return {...defaults,...JSON.parse(localStorage.getItem('suno-preview-preferences')||'{}')};},async set(value){localStorage.setItem('suno-preview-preferences',JSON.stringify({...JSON.parse(localStorage.getItem('suno-preview-preferences')||'{}'),...value}));}}},tabs:{async create(){previewState.notice='Предпросмотр: открыть Suno';}}};
 const fixture = new URLSearchParams(location.search).get('state');
+const docsView = new URLSearchParams(location.search).get('docs');
+if(docsView){
+ if(docsView==='recording'){previewState.recording=true;previewState.auto=true;previewState.processing=true;previewState.playback.playing=true;}
+ // Local artwork is allowed only by this development fixture, never in the extension.
+ const acceptsImage=SunoPolicy.isImageUrl;
+ SunoPolicy.isImageUrl=value=>value==='/docs-cover.svg'||acceptsImage(value);
+ chrome.storage.local.get=async defaults=>defaults;
+ previewState.track.title='Ночной импульс';
+ previewState.track.artist='Beast Sessions';
+ previewState.track.album='After Hours';
+ previewState.track.tags='Dark electro, 125 BPM, deep pulsing bass, icy synth arpeggios, atmospheric pads and a hypnotic four-on-the-floor groove.';
+ previewState.track.lyrics='[Instrumental Intro]\\n\\n[Verse]\\nГород засыпает, остаётся свет,\\nВ ритме переулков растворится след.\\n\\n[Chorus]\\nНочной импульс — ближе к тишине,\\nКаждый новый такт останется во мне.\\n\\n[Instrumental Outro]';
+ previewState.track.image_url='/docs-cover.svg';
+ previewState.lastFile='';
+ window.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(()=>{
+  if(docsView==='metadata'||docsView==='settings'){
+   const section=document.querySelector(docsView==='metadata'?'#track-details':'.settings');
+   section.open=true;
+   document.getElementById('panel-content').scrollTop=section.offsetTop-document.getElementById('panel-content').offsetTop;
+  }
+ }));
+}
 if(fixture==='recording'||fixture==='album'){previewState.recording=true;previewState.auto=true;previewState.processing=true;previewState.playback.playing=true;}
 if(fixture==='album')previewState.track.album='Пример альбома · только макет';
 if(fixture==='empty'){previewState.track=null;previewState.playback=null;previewState.lastFile='';}
@@ -56,6 +78,11 @@ const server = http.createServer((req, res) => {
   if (url.pathname === '/floating-preview.html') { res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' }); res.end(floatingHtml); return; }
   if (url.pathname === '/floating-preview.js') { res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' }); res.end(floatingJs); return; }
   if (url.pathname === '/preview-api.js') { res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8' }); res.end(previewApi); return; }
+  if (url.pathname === '/docs-cover.svg' || url.pathname === '/docs-showcase.html') {
+    const file = url.pathname === '/docs-cover.svg' ? 'cover.svg' : 'showcase.html';
+    res.writeHead(200, { 'Content-Type': file.endsWith('.svg') ? 'image/svg+xml' : 'text/html; charset=utf-8' });
+    res.end(fs.readFileSync(path.join(__dirname, 'fixtures', file))); return;
+  }
   const route = routes.get(url.pathname);
   if (!route) { res.writeHead(404); res.end(); return; }
   let content = fs.readFileSync(path.join(root, route[0]));
