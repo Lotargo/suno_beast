@@ -23,7 +23,7 @@ fs.mkdirSync(stateDir, { recursive: true });
 const settingsFile = path.join(stateDir, 'settings.json');
 let config = {};
 try { config = JSON.parse(fs.readFileSync(settingsFile, 'utf8')); } catch {}
-// Old project/downloads was an implementation default, not a browser preference.
+// Empty outputDir selects browser delivery; a custom folder must be explicit.
 let outputDir = process.env.SUNO_BEAST_OUTPUT_DIR || (config.mode === 'custom' && path.isAbsolute(config.outputDir || '') ? config.outputDir : '');
 const library = new Library(path.join(stateDir, 'collection'));
 const staging = path.join(stateDir, 'pending');

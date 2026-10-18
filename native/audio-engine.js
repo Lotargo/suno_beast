@@ -6,7 +6,10 @@ const { downloadSunoImage } = require('./suno-image');
 
 class AudioEngine {
   constructor(options = {}) {
-    this.outputDir = options.outputDir || path.join(__dirname, '..', 'downloads');
+    if (typeof options.outputDir !== 'string' || !path.isAbsolute(options.outputDir)) {
+      throw new TypeError('Audio output directory must be an explicit absolute path');
+    }
+    this.outputDir = options.outputDir;
     this.thresholdDb = options.thresholdDb || -45; // Silence threshold in dB
     this.silenceLeadDuration = options.silenceLeadDuration || 0.03; // Seconds above threshold to trigger start
     this.silenceTrailDuration = options.silenceTrailDuration || 0.08; // Seconds of silence at end to cut

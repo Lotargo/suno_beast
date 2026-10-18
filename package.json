@@ -1,6 +1,6 @@
 {
   "name": "suno-beast",
-  "version": "2.8.0",
+  "version": "2.8.1",
   "description": "Chrome/Edge extension for Suno with local FFmpeg recording and audio processing",
   "scripts": {
     "install:helper": "powershell -NoProfile -ExecutionPolicy Bypass -File native/install.ps1",

@@ -5,6 +5,18 @@ const path = require('node:path');
 const os = require('node:os');
 const { execFileSync } = require('node:child_process');
 const AudioEngine = require('../native/audio-engine');
+test('audio processing requires an explicit destination instead of creating project downloads', t => {
+  for (const outputDir of [undefined, '', 'downloads']) {
+    assert.throws(() => new AudioEngine({ outputDir }), /explicit absolute path/);
+  }
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'suno-output-test-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const destination = path.join(dir, 'Selected folder');
+  const engine = new AudioEngine({ outputDir: destination });
+  assert.equal(engine.outputDir, destination);
+  assert.ok(fs.statSync(destination).isDirectory());
+});
+
 test('MP3 stream copy preserves encoded audio when trimming is off', async t => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'suno-copy-test-'));
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
