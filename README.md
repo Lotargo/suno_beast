@@ -45,17 +45,6 @@ Suno Beast добавляет к Suno компактную панель запи
 
 На скриншотах — настоящий интерфейс расширения с демонстрационными данными.
 
-<details>
-<summary>Рассмотреть отдельные экраны</summary>
-
-<p align="center">
-  <img src="docs/images/recording.png" alt="Обложка, таймер и активная запись Auto-Grab" width="30%">
-  <img src="docs/images/metadata.png" alt="Стиль и текст песни" width="30%">
-  <img src="docs/images/settings.png" alt="Формат, обрезка тишины и выбор папки" width="30%">
-</p>
-
-</details>
-
 ## Совместимость
 
 **Расширение создавалось и тестировалось на Windows.** Предназначено для Chrome и Edge. macOS и Linux не тестировались; установка локального помощника рассчитана на Windows.
