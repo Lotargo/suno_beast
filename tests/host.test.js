@@ -5,7 +5,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { spawn, execFileSync } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
-const id = execFileSync(process.execPath, [path.join(root, 'scripts/extension-id.js')], { encoding: 'utf8' });
+const id = execFileSync(process.execPath, [path.join(root, 'native/extension-id.js')], { encoding: 'utf8' });
 function client(outputDir, launcher = false, stateDir = path.join(outputDir, '.state')) {
   const executable = launcher ? 'cmd.exe' : process.execPath;
   const args = launcher ? ['/d', '/c', path.join(root, 'native/launch-host.cmd'), `chrome-extension://${id}/`] : [path.join(root, 'native/host.js'), `chrome-extension://${id}/`];

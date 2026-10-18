@@ -1,11 +1,11 @@
 $ErrorActionPreference = 'Stop'
-$projectDir = $PSScriptRoot
+$hostDir = $PSScriptRoot
+$projectDir = Split-Path -Parent $hostDir
 $nodePath = (Get-Command node.exe -ErrorAction Stop).Source
 Get-Command ffmpeg.exe -ErrorAction Stop | Out-Null
-$manifestPath = Join-Path $projectDir 'extension\manifest.json'
-$extensionId = & $nodePath (Join-Path $projectDir 'scripts\extension-id.js')
+Get-Command ffprobe.exe -ErrorAction Stop | Out-Null
+$extensionId = & $nodePath (Join-Path $hostDir 'extension-id.js')
 if ($LASTEXITCODE -ne 0) { throw 'Cannot determine extension ID' }
-$hostDir = Join-Path $projectDir 'native'
 $launcher = Join-Path $hostDir 'launch-host.cmd'
 # Keep the launcher ASCII: node handles the Unicode source path from this directory.
 $launcherBody = "@echo off`r`n`"$nodePath`" `"%~dp0host.js`" %*`r`n"

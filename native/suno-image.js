@@ -1,4 +1,4 @@
-const fs = require('fs');
+const fs = require('node:fs');
 const { isImageUrl } = require('../extension/policy');
 async function downloadSunoImage(url, destination, fetcher = fetch) {
   const signal = AbortSignal.timeout(10000), limit = 5 * 1024 * 1024;

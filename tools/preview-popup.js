@@ -1,4 +1,4 @@
-// Visual QA fixture only. No recording, native messaging, files or credentials.
+// Development preview only. No recording, native messaging, files or credentials.
 const http = require('http');
 const fs = require('fs');
 const path = require('path');

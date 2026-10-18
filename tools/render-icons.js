@@ -1,4 +1,4 @@
-// Build assets only; the shipped extension does not depend on sharp.
+// Development asset build only; the shipped extension does not depend on sharp.
 // Set SUNO_BEAST_SHARP to a sharp module path if it is not installed locally.
 const path = require('node:path');
 const sharp = require(process.env.SUNO_BEAST_SHARP || 'sharp');

@@ -1,8 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const https = require('https');
-const http = require('http');
 const os = require('os');
 const { downloadSunoImage } = require('./suno-image');
 
@@ -19,17 +17,6 @@ class AudioEngine {
     if (!fs.existsSync(this.outputDir)) {
       fs.mkdirSync(this.outputDir, { recursive: true });
     }
-  }
-
-  setSettings(settings = {}) {
-    if (settings.outputDir) {
-      this.outputDir = settings.outputDir;
-      if (!fs.existsSync(this.outputDir)) {
-        fs.mkdirSync(this.outputDir, { recursive: true });
-      }
-    }
-    if (settings.thresholdDb !== undefined) this.thresholdDb = Number(settings.thresholdDb);
-    if (settings.audioBitrate) this.audioBitrate = settings.audioBitrate;
   }
 
   sanitizeFilename(name) {
@@ -179,55 +166,6 @@ class AudioEngine {
     });
   }
 
-  /**
-   * Directly download lossless stream from Suno CDN with metadata & optional silence trimming
-   */
-  async grabDirectStream(streamUrl, metadata = {}, trimSilence = false) {
-    const tempInput = path.join(this.outputDir, `temp_stream_${Date.now()}.mp3`);
-    await this.downloadFile(streamUrl, tempInput);
-
-    if (trimSilence) {
-      return await this.processAndTrimAudio(tempInput, metadata, { format: 'mp3', trimSilence: true });
-    } else {
-      // Just tag & save original file
-      return await this.processAndTrimAudio(tempInput, metadata, { format: 'mp3', trimSilence: false, copyAudio: true });
-    }
-  }
-
-  downloadFile(url, destPath) {
-    return new Promise((resolve, reject) => {
-      const file = fs.createWriteStream(destPath);
-      const client = url.startsWith('https') ? https : http;
-
-      const request = client.get(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
-          'Referer': 'https://suno.com/'
-        }
-      }, (response) => {
-        if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-          // Handle redirect
-          file.close();
-          return this.downloadFile(response.headers.location, destPath).then(resolve).catch(reject);
-        }
-        if (response.statusCode !== 200) {
-          file.close();
-          fs.unlinkSync(destPath);
-          return reject(new Error(`Failed to download: HTTP ${response.statusCode}`));
-        }
-        response.pipe(file);
-        file.on('finish', () => {
-          file.close(() => resolve(destPath));
-        });
-      });
-
-      request.on('error', (err) => {
-        file.close();
-        if (fs.existsSync(destPath)) fs.unlinkSync(destPath);
-        reject(err);
-      });
-    });
-  }
 }
 
 module.exports = AudioEngine;

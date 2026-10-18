@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
-const { downloadSunoImage } = require('../src/suno-image');
+const { downloadSunoImage } = require('../native/suno-image');
 test('cover fetch checks every redirect and rejects non-images before writing a file', async t => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'suno-image-test-')), target = path.join(dir, 'cover.jpg');
   t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
