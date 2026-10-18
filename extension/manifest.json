@@ -1,0 +1,70 @@
+{
+  "manifest_version": 3,
+  "name": "Suno Beast",
+  "version": "2.7.2",
+  "description": "Record audio from a Suno tab and process it locally with FFmpeg. Google login stays in your browser.",
+  "minimum_chrome_version": "116",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwnd76IlbrUxcIHoeWr50KK9M37LeUfhu9W4Bs3x4O15EF7pDfeJTIqNkOGwee0imHOo/Or2pCc3wCdLXHIeN6X9HBZluj/UDP+oBh2WukgtY2QzlCAfNFDJdpK1EpBx7ez6u4xIijnW2k972R1S53WmOIFxYs3Ul0QEp1fcUYEeUeD9BLhWddOtCygbv1OH2Y7GkXEegvBoolOzLB6sxuMpH763eg3/cAkmEblwfAbqUD6L1gh5YbYapbIWYlGTeaL4vI18rZ4vPweCbspwm3/eg4yEZMEYTUEUcrGfRatFJaPo0wJp9m68JhSSkVVJVwxkG5A7jgeZ6M2of6AH+4wIDAQAB",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "tabCapture",
+    "offscreen",
+    "storage",
+    "nativeMessaging",
+    "webRequest",
+    "downloads"
+  ],
+  "host_permissions": [
+    "https://suno.com/*",
+    "https://www.suno.com/*",
+    "https://*.suno.ai/*",
+    "https://*.suno.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Suno Beast — открыть панель",
+    "default_icon": {
+      "16": "assets/icon-16.png",
+      "24": "assets/icon-24.png",
+      "32": "assets/icon-32.png",
+      "48": "assets/icon-48.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://suno.com/*",
+        "https://www.suno.com/*"
+      ],
+      "js": [
+        "policy.js",
+        "panel-host.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "popup.html"
+      ],
+      "matches": [
+        "https://suno.com/*",
+        "https://www.suno.com/*"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'"
+  },
+  "icons": {
+    "16": "assets/icon-16.png",
+    "32": "assets/icon-32.png",
+    "48": "assets/icon-48.png",
+    "128": "assets/icon-128.png"
+  }
+}

@@ -1,0 +1,20 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const os = require('node:os');
+const Library = require('../native/library');
+test('collection distinguishes IDs, rejects modified files, and reserves across helper instances', t => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'suno-index-test-'));
+  const first = new Library(dir), second = new Library(dir);
+  t.after(() => { first.close(); second.close(); fs.rmSync(dir, { recursive: true, force: true }); });
+  const track = { id: '/song/a15e6b08-0f21-4623-9f6b-5928eef0c260' };
+  assert.equal(first.reserve(track).duplicate, false);
+  assert.equal(second.reserve(track).pending, true);
+  first.release(track); assert.equal(second.reserve(track).duplicate, false);
+  second.release(track);
+  const file = path.join(dir, 'audio.mp3'); fs.writeFileSync(file, 'audio'); first.add(track, file);
+  assert.equal(second.check(track).duplicate, true);
+  fs.appendFileSync(file, 'changed'); assert.equal(second.check(track).duplicate, false);
+  assert.equal(first.check({ title: 'audio' }).identified, false);
+});

@@ -1,0 +1,13 @@
+* text=auto eol=lf
+
+# Windows launchers and PowerShell installers
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary assets
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary

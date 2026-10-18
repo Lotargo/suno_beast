@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Suno Beast</title><link rel="icon" type="image/png" href="assets/icon-32.png"><link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-shell">
+  <header class="header">
+    <div class="brand"><img src="assets/suno-logo.svg" alt="Suno" width="89" height="22"><span class="brand-tag">Beast</span><h1 class="sr-only">Suno Beast</h1></div>
+    <div class="header-actions"><div class="language-switch" role="group" aria-label="Язык интерфейса" data-i18n-aria-label="Язык интерфейса"><button type="button" data-language="ru" lang="ru" aria-label="Русский" aria-pressed="true">RU</button><button type="button" data-language="en" lang="en" aria-label="English" aria-pressed="false">EN</button></div><button id="close-panel" class="panel-close" type="button" aria-label="Закрыть панель" title="Закрыть панель · запись продолжится" hidden data-i18n-aria-label="Закрыть панель" data-i18n-title="Закрыть панель · запись продолжится"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 7 10 10M17 7 7 17"/></svg></button></div>
+  </header>
+  <main id="panel-content" tabindex="0" aria-label="Панель записи Suno" data-i18n-aria-label="Панель записи Suno">
+    <section class="player" aria-label="Текущий трек и статус записи" data-i18n-aria-label="Текущий трек и статус записи">
+      <div class="player-top"><span class="eyebrow" data-i18n="Текущий трек">Текущий трек</span><span id="mode" class="mode" data-i18n="Ожидание">Ожидание</span></div>
+      <div class="song">
+        <div class="art" aria-hidden="true"><img id="cover" alt="" referrerpolicy="no-referrer" hidden><svg id="cover-fallback" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13M9 8l12-2"/><ellipse cx="6" cy="18" rx="3" ry="2"/><ellipse cx="18" cy="16" rx="3" ry="2"/></svg></div>
+        <div class="song-copy"><p id="track" class="track" data-i18n="Выбери трек в Suno">Выбери трек в Suno</p><p id="artist" class="artist" data-i18n="Твоя музыка — в твоих файлах">Твоя музыка — в твоих файлах</p><p id="album" class="album" hidden></p><p id="track-facts" class="track-facts" hidden></p></div>
+      </div>
+      <div class="playback">
+        <div class="playback-meta"><span id="playback-state" data-i18n="Ожидание воспроизведения">Ожидание воспроизведения</span><span id="playback-time" class="playback-time">—:— / —:—</span></div>
+        <progress id="playback-progress" value="0" max="1" aria-label="Прогресс воспроизведения" aria-describedby="playback-time playback-hint" hidden data-i18n-aria-label="Прогресс воспроизведения"></progress>
+        <p id="playback-hint" class="playback-hint" data-i18n="Только просмотр · без перемотки">Только просмотр · без перемотки</p>
+      </div>
+      <p id="style-preview" class="style-preview" hidden></p>
+      <div class="status-line"><p id="status" role="status" aria-live="polite" data-i18n="Проверяем подключение…">Проверяем подключение…</p></div>
+    </section>
+
+    <div class="record-actions">
+      <button id="record" class="button primary" aria-pressed="false"><span class="record-icon" aria-hidden="true"></span><span id="record-label" data-i18n="Записать">Записать</span></button>
+      <button id="auto" class="button secondary" aria-pressed="false" aria-describedby="auto-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m17 2 4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4m14-1v2a3 3 0 0 1-3 3H3"/></svg><span class="auto-stop" aria-hidden="true"></span><span id="auto-label">Auto-Grab</span></button>
+    </div>
+    <p id="auto-hint" class="hint auto-hint" data-i18n="Сохраняет полные треки. Уже записанные пропускает.">Сохраняет полные треки. Уже записанные пропускает.</p>
+
+    <button id="grab" class="download" aria-describedby="grab-hint" disabled>
+      <span class="file-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Zm0 0v6h6M9 15h6m-6 3h4"/></svg></span>
+      <span class="download-copy"><span class="download-title" data-i18n="Сохранить MP3">Сохранить MP3</span><span id="grab-hint" class="hint" data-i18n="Сначала запусти трек в Suno">Сначала запусти трек в Suno</span></span>
+      <svg class="download-arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg>
+    </button>
+
+    <details id="track-details" class="track-details">
+      <summary><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v.1"/></svg><span data-i18n="Стиль и текст">Стиль и текст</span><svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></summary>
+      <div class="metadata-body">
+        <p id="metadata-status" class="hint" role="status" aria-live="polite" data-i18n="Выбери трек в Suno">Выбери трек в Suno</p>
+        <div id="style-section" hidden><h2 data-i18n="Стиль">Стиль</h2><p id="style-full" class="style-full"></p></div>
+        <div id="lyrics-section" hidden><h2 data-i18n="Текст песни">Текст песни</h2><pre id="lyrics" class="lyrics" tabindex="0" aria-label="Текст песни" data-i18n-aria-label="Текст песни"></pre></div>
+        <p id="lyrics-missing" class="hint" hidden data-i18n="Текст не предоставлен в карточке Suno">Текст не предоставлен в карточке Suno</p>
+        <p id="instrumental" class="hint" hidden data-i18n="Инструментальный трек — без текста песни">Инструментальный трек — без текста песни</p>
+        <div class="metadata-actions"><button id="refresh-metadata" class="metadata-refresh" type="button" data-i18n="Обновить сведения">Обновить сведения</button><a id="track-link" target="_blank" rel="noopener noreferrer" hidden data-i18n="Карточка Suno ↗">Карточка Suno ↗</a></div>
+      </div>
+    </details>
+
+    <details class="settings">
+      <summary><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9m4 0h3M4 17h3m4 0h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg><span data-i18n="Настройки записи">Настройки записи</span><svg class="chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></summary>
+      <div class="settings-body">
+        <div class="settings-grid"><div><label for="format" data-i18n="Формат">Формат</label><select id="format"><option value="mp3" data-i18n="MP3 · 320 кбит/с">MP3 · 320 кбит/с</option><option value="wav" data-i18n="WAV · 24 бит">WAV · 24 бит</option></select></div><div><label for="threshold" data-i18n="Порог тишины, dB">Порог тишины, dB</label><input id="threshold" type="number" min="-60" max="-20" value="-45"></div></div>
+        <label class="check"><input type="checkbox" id="trim" checked><span data-i18n="Обрезать тишину по краям">Обрезать тишину по краям</span></label>
+        <p class="destination-label" data-i18n="Папка сохранения">Папка сохранения</p>
+        <p id="directory" class="hint directory" role="status" aria-live="polite" data-i18n="Стандартные загрузки браузера">Стандартные загрузки браузера</p>
+        <div class="destination-actions"><button id="choose-folder" class="metadata-refresh" type="button" data-i18n="Выбрать папку…">Выбрать папку…</button><button id="reset-folder" class="metadata-refresh" type="button" data-i18n="По умолчанию">По умолчанию</button></div>
+        <p class="hint collection-hint" data-i18n="Дубли определяются по ID Suno. Старую запись без ID можно связать с текущим треком.">Дубли определяются по ID Suno. Старую запись без ID можно связать с текущим треком.</p>
+        <button id="link-existing" class="metadata-refresh" type="button" aria-describedby="link-hint" data-i18n="Связать с существующим файлом…">Связать с существующим файлом…</button>
+        <p id="link-hint" class="hint" data-i18n="Выбери полный файл именно этого трека. Файл останется на месте.">Выбери полный файл именно этого трека. Файл останется на месте.</p>
+      </div>
+    </details>
+
+    <footer class="footer">
+      <div class="footer-actions"><button id="folder" class="button folder"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Zm0 2h18"/></svg><span data-i18n="Мои записи">Мои записи</span></button><button id="open" class="open-link"><span data-i18n="Открыть Suno">Открыть Suno</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 17 17 7H7m10 0v10"/></svg></button></div>
+      <p class="privacy"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg><span data-i18n="Записи остаются на этом устройстве">Записи остаются на этом устройстве</span></p>
+    </footer>
+  </main>
+  </div>
+  <script src="policy.js"></script><script src="playback.js"></script><script src="i18n.js"></script><script src="popup.js"></script>
+</body>
+</html>

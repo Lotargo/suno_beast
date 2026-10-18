@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suno Beast Toolbar</title>
+  <link rel="stylesheet" href="toolbar.css">
+</head>
+<body>
+  <div class="toolbar-container">
+    <!-- Brand & Window Controls -->
+    <div class="brand-section">
+      <div class="beast-logo">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">SUNO<span class="logo-accent">BEAST</span></span>
+      </div>
+      <div class="nav-controls">
+        <button id="btnBack" class="icon-btn" title="Назад (Alt+Left)">‹</button>
+        <button id="btnForward" class="icon-btn" title="Вперёд (Alt+Right)">›</button>
+        <button id="btnReload" class="icon-btn" title="Обновить (F5)">↻</button>
+        <button id="btnHome" class="icon-btn" title="На главную Suno">🏠</button>
+      </div>
+    </div>
+
+    <!-- URL / Status Bar -->
+    <div class="url-section">
+      <div class="url-bar-wrapper">
+        <span class="lock-icon" id="securityIcon">🔒</span>
+        <input type="text" id="urlInput" value="https://suno.com" spellcheck="false" placeholder="Введите URL...">
+        <div id="loadingSpinner" class="spinner hidden"></div>
+      </div>
+    </div>
+
+    <!-- Live Audio Meter & Track Info -->
+    <div class="audio-monitor-section">
+      <div class="vu-meter-container" title="Уровень входного аудио">
+        <div class="vu-meter-bar" id="vuMeter"></div>
+      </div>
+      <div class="track-info" id="trackInfo">
+        <div class="track-title" id="trackTitle">Ожидание трека...</div>
+        <div class="track-meta" id="trackMeta">Запусти воспроизведение в Suno</div>
+      </div>
+    </div>
+
+    <!-- Action Center -->
+    <div class="actions-section">
+      <!-- Big Record Button -->
+      <button id="btnRecord" class="action-btn record-btn" title="Ручной захват аудио с обрезкой пустоты">
+        <span class="rec-dot"></span>
+        <span id="recText">REC</span>
+        <span id="recTimer" class="timer hidden">00:00</span>
+      </button>
+
+      <!-- Auto Capture Toggle -->
+      <label class="toggle-pill" title="Автоматический захват: запись при старте трека, остановка и обрезка тишины при смене">
+        <input type="checkbox" id="autoCaptureToggle">
+        <span class="pill-slider">
+          <span class="pill-icon">🤖</span>
+          <span class="pill-label">Auto-Grab</span>
+        </span>
+      </label>
+
+      <!-- Lossless Sniffer Quick Grab -->
+      <button id="btnGrabStream" class="action-btn grab-btn disabled" title="Быстрый перехват чистого потока из сети (MP3 320k) без потерь">
+        <span>⚡ Grab MP3</span>
+      </button>
+
+      <!-- Folder & Settings -->
+      <button id="btnOpenFolder" class="icon-btn secondary" title="Открыть папку с треками">📁</button>
+      <button id="btnSettings" class="icon-btn secondary" title="Настройки обрезки и сохранения">⚙</button>
+      <button id="btnDevTools" class="icon-btn secondary" title="Консоль разработчика">🛠</button>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Settings Modal Dialog -->
+  <div id="settingsModal" class="modal hidden">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>⚙ Настройки захвата и обрезки</h3>
+        <button id="btnCloseSettings" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="thresholdInput">
+            <span>Порог детекции тишины (dB)</span>
+            <span class="value-badge" id="thresholdValue">-45 dB</span>
+          </label>
+          <input type="range" id="thresholdInput" min="-60" max="-20" step="1" value="-45">
+          <div class="help-text">Всё, что тише этого уровня, считается пустотой и отрезается на старте и в конце.</div>
+        </div>
+
+        <div class="form-group">
+          <label for="formatSelect">Формат сохранения</label>
+          <select id="formatSelect">
+            <option value="mp3" selected>MP3 (320 kbps High Quality)</option>
+            <option value="wav">WAV (24-bit Lossless Studio)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Папка для сохранения</label>
+          <div class="dir-picker-row">
+            <input type="text" id="outputDirInput" readonly>
+            <button id="btnBrowseDir" class="btn-subtle">Обзор...</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="btnSaveSettings" class="btn-primary">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="toolbar.js"></script>
+</body>
+</html>
