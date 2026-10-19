@@ -4,7 +4,7 @@
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-f4f2ed?style=flat-square&amp;labelColor=29292d" alt="License: MIT"></a>
-  <img src="https://img.shields.io/badge/platform-Windows-ffac88?style=flat-square&amp;labelColor=29292d" alt="Platform: Windows">
+  <img src="https://img.shields.io/badge/platform-Windows%20%2F%20macOS-ffac88?style=flat-square&amp;labelColor=29292d" alt="Platform: Windows / macOS">
   <img src="https://img.shields.io/badge/browser-Chrome%20%2F%20Edge-f4f2ed?style=flat-square&amp;labelColor=29292d" alt="Chrome / Edge">
   <img src="https://img.shields.io/badge/extension-Manifest%20V3-f4f2ed?style=flat-square&amp;labelColor=29292d" alt="Manifest V3">
   <img src="https://img.shields.io/badge/interface-RU%20%2F%20EN-f4f2ed?style=flat-square&amp;labelColor=29292d" alt="Interface: RU / EN">
@@ -20,6 +20,7 @@
   <a href="#установка">Установка</a> ·
   <a href="#как-пользоваться">Как пользоваться</a> ·
   <a href="#вопросы-и-решения">Вопросы и решения</a> ·
+  <a href="CHANGELOG.md">История изменений</a> ·
   <a href="#поддержать-проект">Поддержать проект</a>
 </p>
 
@@ -47,7 +48,7 @@ Suno Beast добавляет к Suno компактную панель запи
 
 ## Совместимость
 
-**Расширение создавалось и тестировалось на Windows.** Предназначено для Chrome и Edge. macOS и Linux не тестировались; установка локального помощника рассчитана на Windows.
+**Расширение создавалось на Windows.** Предназначено для Chrome и Edge. Установка локального помощника поддерживает Windows и macOS; Linux не поддерживается.
 
 Для работы нужны:
 
@@ -59,7 +60,7 @@ Suno Beast добавляет к Suno компактную панель запи
 
 ### 1. Скачать проект
 
-Скачай архив через **Code → Download ZIP** на [странице репозитория](https://github.com/Lotargo/suno_beast) и распакуй его в постоянную папку. Или используй Git:
+Скачай архив **Suno-Beast-v2.9.0.zip** на [странице последнего релиза](https://github.com/Lotargo/suno_beast/releases/latest) и распакуй его в постоянную папку. Исходники также доступны через **Code → Download ZIP** на [странице репозитория](https://github.com/Lotargo/suno_beast). Или используй Git:
 
 ```powershell
 git clone https://github.com/Lotargo/suno_beast.git
@@ -70,9 +71,9 @@ cd suno_beast
 
 ### 2. Подключить аудиопомощник
 
-Открой PowerShell в корне распакованного проекта. Проверь, что установленные инструменты доступны:
+Открой терминал в корне распакованного проекта (PowerShell на Windows). Проверь, что установленные инструменты доступны:
 
-```powershell
+```sh
 node --version
 npm --version
 ffmpeg -version
@@ -81,11 +82,11 @@ ffprobe -version
 
 Затем выполни:
 
-```powershell
+```sh
 npm run install:helper
 ```
 
-Команда регистрирует локальный аудиопомощник для Chrome и Edge. Права администратора не нужны. Помощник запускается браузером по необходимости через [Native Messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging).
+Команда определяет платформу и регистрирует локальный аудиопомощник для Chrome и Edge. На macOS она записывает манифесты в `~/Library/Application Support/Google/Chrome/NativeMessagingHosts` и `~/Library/Application Support/Microsoft Edge/NativeMessagingHosts`. Права администратора не нужны. Помощник запускается браузером по необходимости через [Native Messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging). После установки перезапусти браузер.
 
 ### 3. Загрузить расширение в браузер
 
@@ -133,21 +134,21 @@ Auto-Grab проверяет коллекцию по **точному ID Suno**:
 | :--- | :--- |
 | Помощник не подключён | Проверь Node.js, FFmpeg и ffprobe в `PATH`, выполни `npm run install:helper` из папки проекта и перезапусти браузер. |
 | PowerShell блокирует `npm.ps1` | Используй `npm.cmd run install:helper`. |
-| Установщик пишет `A different host is already registered` | Зарегистрирована другая копия. Запусти `native/uninstall.ps1` из старой папки, затем установи помощник из новой. |
+| Установщик пишет `A different host is already registered` или `a different host is already registered` | Зарегистрирована другая копия. На Windows запусти `native/uninstall.ps1` из старой папки; на macOS удали регистрацию из папки `NativeMessagingHosts` соответствующего браузера, затем установи помощник из новой папки. |
 | После обновления видно старое поведение | На странице расширений нажми кнопку перезагрузки карточки Suno Beast, затем снова открой панель. |
 | MP3-кнопка недоступна | Прямой поток ещё не обнаружен. Используй запись вкладки. |
 | Auto-Grab пропускает текущую песню | Проверь, что трек запущен с начала и его полная запись ещё не существует в коллекции. |
-| Загрузка отменена | Готовый файл остаётся в `%LOCALAPPDATA%\SunoBeast\pending`; путь отображается в панели. |
+| Загрузка отменена | Готовый файл остаётся в `%LOCALAPPDATA%\SunoBeast\pending` (Windows) или `~/Library/Application Support/SunoBeast/pending` (macOS); путь отображается в панели. |
 
-**Обновление.** Закончи запись, обнови файлы проекта и перезагрузи расширение на странице управления. После перезапуска включи Auto-Grab заново.
+**Обновление.** Закончи запись, обнови файлы проекта в прежней папке, выполни `npm run install:helper` и перезагрузи расширение на странице управления. При первом подключении помощника перезапусти браузер. После перезапуска включи Auto-Grab заново. Изменения версий перечислены в [changelog](CHANGELOG.md).
 
-**Удаление.** Удали расширение в браузере. Для удаления регистрации аудиопомощника выполни из корня проекта:
+**Удаление.** Удали расширение в браузере. На Windows для удаления регистрации аудиопомощника выполни из корня проекта:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\native\uninstall.ps1
 ```
 
-Записи и настройки сохраняются. Настройки и индекс коллекции находятся в `%LOCALAPPDATA%\SunoBeast`.
+На macOS удали `com.sunobeast.audio.json` из папок `NativeMessagingHosts`, указанных выше. Записи и настройки сохраняются. Настройки и индекс коллекции находятся в `%LOCALAPPDATA%\SunoBeast` (Windows) или `~/Library/Application Support/SunoBeast` (macOS).
 
 ## Локальная обработка
 

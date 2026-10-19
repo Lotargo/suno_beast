@@ -18,7 +18,10 @@ const extensionId = crypto.createHash('sha256').update(Buffer.from(manifest.key,
 if (process.argv[2] !== `chrome-extension://${extensionId}/`) process.exit(1);
 // stdout is exclusively the native messaging protocol, including AudioEngine logs.
 console.log = (...args) => console.error(...args);
-const stateDir = process.env.SUNO_BEAST_STATE_DIR || path.join(process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local'), 'SunoBeast');
+const defaultStateRoot = process.platform === 'darwin'
+  ? path.join(os.homedir(), 'Library', 'Application Support')
+  : process.env.LOCALAPPDATA || path.join(os.homedir(), 'AppData', 'Local');
+const stateDir = process.env.SUNO_BEAST_STATE_DIR || path.join(defaultStateRoot, 'SunoBeast');
 fs.mkdirSync(stateDir, { recursive: true });
 const settingsFile = path.join(stateDir, 'settings.json');
 let config = {};
@@ -54,6 +57,16 @@ function setFolder(directory) {
   outputDir = directory; return status();
 }
 async function choose(kind) {
+  if (process.platform === 'darwin') {
+    const script = kind === 'file' ? 'POSIX path of (choose file)' : 'POSIX path of (choose folder)';
+    try {
+      const { stdout } = await runFile('osascript', ['-e', script], { encoding: 'utf8', timeout: 300000 });
+      return stdout.trim();
+    } catch (error) {
+      if (error.code === 1 && /User canceled|(-128)/.test(error.stderr || '')) return '';
+      throw error;
+    }
+  }
   const { stdout } = await runFile('powershell.exe', ['-NoProfile', '-STA', '-ExecutionPolicy', 'Bypass', '-File', path.join(__dirname, 'choose-path.ps1'), '-Kind', kind, '-Initial', outputDir || ''], { windowsHide: true, encoding: 'utf8', timeout: 300000 });
   return stdout.trim();
 }
@@ -147,7 +160,9 @@ async function handle(message) {
   }
   if (message.type === 'folder') {
     if (!outputDir) throw new Error('Use the browser Downloads folder');
-    const child = spawn('explorer.exe', [outputDir], { windowsHide: true, stdio: 'ignore' });
+    const child = process.platform === 'darwin'
+      ? spawn('open', [outputDir], { stdio: 'ignore' })
+      : spawn('explorer.exe', [outputDir], { windowsHide: true, stdio: 'ignore' });
     child.on('error', () => {}); child.unref(); return {};
   }
   if (message.type === 'begin') {

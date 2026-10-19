@@ -6,10 +6,10 @@ const os = require('node:os');
 const { spawn, execFileSync } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
 const id = execFileSync(process.execPath, [path.join(root, 'native/extension-id.js')], { encoding: 'utf8' });
-function client(outputDir, launcher = false, stateDir = path.join(outputDir, '.state')) {
+function client(outputDir, launcher = false, stateDir = path.join(outputDir, '.state'), extraEnv = {}) {
   const executable = launcher ? 'cmd.exe' : process.execPath;
   const args = launcher ? ['/d', '/c', path.join(root, 'native/launch-host.cmd'), `chrome-extension://${id}/`] : [path.join(root, 'native/host.js'), `chrome-extension://${id}/`];
-  const env = { ...process.env, SUNO_BEAST_STATE_DIR: stateDir };
+  const env = { ...process.env, ...extraEnv, SUNO_BEAST_STATE_DIR: stateDir };
   if (outputDir) env.SUNO_BEAST_OUTPUT_DIR = outputDir; else delete env.SUNO_BEAST_OUTPUT_DIR;
   const child = spawn(executable, args, { env, stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true });
   let buffer = Buffer.alloc(0), seq = 0; const pending = new Map();
@@ -73,6 +73,18 @@ test('registered Windows launcher works from a Unicode project directory', { ski
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'suno-launch-test-')); const host = client(dir, true);
   t.after(async () => { await host.close(); fs.rmSync(dir, { recursive: true, force: true }); });
   assert.equal((await host.call('status')).outputDir, dir);
+});
+
+test('macOS host chooses a folder with osascript', { skip: process.platform !== 'darwin' }, async t => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'suno-mac-host-'));
+  const bin = path.join(dir, 'bin');
+  const selected = path.join(dir, 'selected folder');
+  fs.mkdirSync(bin);
+  fs.writeFileSync(path.join(bin, 'osascript'), '#!/bin/sh\nprintf "%s\\n" "$SUNO_TEST_SELECTED"\n', { mode: 0o700 });
+  const host = client('', false, path.join(dir, 'state'), { PATH: `${bin}${path.delimiter}${process.env.PATH}`, SUNO_TEST_SELECTED: selected });
+  t.after(async () => { await host.close(); fs.rmSync(dir, { recursive: true, force: true }); });
+  assert.equal((await host.call('choose-folder')).outputDir, selected);
+  assert.equal(fs.existsSync(selected), true);
 });
 
 test('browser default output is staged until acknowledged; exact-ID dedupe survives restart and permits deleted files and excerpts', { timeout: 60000 }, async t => {
