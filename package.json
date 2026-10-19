@@ -1,9 +1,11 @@
 {
   "name": "suno-beast",
-  "version": "2.10.0",
+  "version": "2.11.0",
   "description": "Chromium extension for Suno with local FFmpeg recording and audio processing",
   "scripts": {
     "install:helper": "node native/install.js",
+    "build:windows": "powershell -NoProfile -ExecutionPolicy Bypass -File tools/build-windows-installer.ps1",
+    "test:installer": "node tools/test-windows-installer.js",
     "test": "node --test tests/*.test.js"
   },
   "keywords": [

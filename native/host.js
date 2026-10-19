@@ -9,6 +9,7 @@ const runFile = promisify(execFile);
 const Library = require('./library');
 const { isAudioUrl, isImageUrl, songId } = require('../extension/policy');
 const AudioEngine = require('./audio-engine');
+const { executable } = require('./runtime');
 const MAX_FILE = 256 * 1024 * 1024;
 const MAX_MESSAGE = 512 * 1024;
 const ROOT = path.resolve(__dirname, '..');
@@ -129,7 +130,7 @@ async function handle(message) {
     const track = metadata(message.track);
     if (!track.id) throw new Error('Точный ID Suno пока недоступен');
     const selected = await choose('file'); if (!selected) return { cancelled: true };
-    const { stdout } = await runFile('ffprobe', ['-v', 'error', '-select_streams', 'a:0', '-show_entries', 'stream=codec_type', '-of', 'json', selected], { windowsHide: true, timeout: 15000 });
+    const { stdout } = await runFile(executable('ffprobe'), ['-v', 'error', '-select_streams', 'a:0', '-show_entries', 'stream=codec_type', '-of', 'json', selected], { windowsHide: true, timeout: 15000 });
     if (!JSON.parse(stdout).streams?.length) throw new Error('В выбранном файле нет аудио');
     const existing = library.reserve(track);
     if (existing.pending) throw new Error('Этот трек уже сохраняется. Дождись завершения.');

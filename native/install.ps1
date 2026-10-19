@@ -4,14 +4,24 @@ $ErrorActionPreference = 'Stop'
 $vendors = @('Google\Chrome', 'Microsoft\Edge')
 $hostDir = $PSScriptRoot
 $projectDir = Split-Path -Parent $hostDir
-$nodePath = (Get-Command node.exe -ErrorAction Stop).Source
-Get-Command ffmpeg.exe -ErrorAction Stop | Out-Null
-Get-Command ffprobe.exe -ErrorAction Stop | Out-Null
+$runtimeDir = Join-Path $projectDir 'runtime'
+$bundled = Test-Path -LiteralPath (Join-Path $runtimeDir 'node.exe')
+if ($bundled) {
+    $nodePath = Join-Path $runtimeDir 'node.exe'
+    foreach ($tool in @('ffmpeg.exe', 'ffprobe.exe')) {
+        if (-not (Test-Path -LiteralPath (Join-Path $runtimeDir $tool))) { throw "Bundled tool is missing: $tool. Reinstall Suno Beast." }
+    }
+} else {
+    $nodePath = (Get-Command node.exe -ErrorAction Stop).Source
+    Get-Command ffmpeg.exe -ErrorAction Stop | Out-Null
+    Get-Command ffprobe.exe -ErrorAction Stop | Out-Null
+}
 $extensionId = & $nodePath (Join-Path $hostDir 'extension-id.js')
 if ($LASTEXITCODE -ne 0) { throw 'Cannot determine extension ID' }
 $launcher = Join-Path $hostDir 'launch-host.cmd'
 # Keep the launcher ASCII: node handles the Unicode source path from this directory.
-$launcherBody = "@echo off`r`n`"$nodePath`" `"%~dp0host.js`" %*`r`n"
+$launcherNode = if ($bundled) { '%~dp0..\runtime\node.exe' } else { $nodePath }
+$launcherBody = "@echo off`r`n`"$launcherNode`" `"%~dp0host.js`" %*`r`n"
 [IO.File]::WriteAllText($launcher, $launcherBody, [Text.Encoding]::ASCII)
 $hostManifest = Join-Path $hostDir 'com.sunobeast.audio.json'
 $hostData = @{

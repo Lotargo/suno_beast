@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
 const os = require('os');
+const { executable } = require('./runtime');
 const { downloadSunoImage } = require('./suno-image');
 
 class AudioEngine {
@@ -119,7 +120,7 @@ class AudioEngine {
 
     return new Promise((resolve, reject) => {
       console.log('[AudioEngine] Encoding audio:', { format, trimSilence: options.trimSilence !== false, coverEmbedded });
-      const proc = spawn('ffmpeg', ffmpegArgs, { windowsHide: true });
+      const proc = spawn(executable('ffmpeg'), ffmpegArgs, { windowsHide: true });
       const timeout = setTimeout(() => proc.kill(), 240000);
       let stderr = '';
 
