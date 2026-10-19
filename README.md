@@ -5,14 +5,14 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-f4f2ed?style=flat-square&amp;labelColor=29292d" alt="License: MIT"></a>
   <img src="https://img.shields.io/badge/platform-Windows%20%2F%20macOS-ffac88?style=flat-square&amp;labelColor=29292d" alt="Platform: Windows / macOS">
-  <img src="https://img.shields.io/badge/browser-Chrome%20%2F%20Edge-f4f2ed?style=flat-square&amp;labelColor=29292d" alt="Chrome / Edge">
+  <img src="https://img.shields.io/badge/browser-Chrome%20%2F%20Edge%20%2F%20Yandex-f4f2ed?style=flat-square&amp;labelColor=29292d" alt="Chrome / Edge / Yandex">
   <img src="https://img.shields.io/badge/extension-Manifest%20V3-f4f2ed?style=flat-square&amp;labelColor=29292d" alt="Manifest V3">
   <img src="https://img.shields.io/badge/interface-RU%20%2F%20EN-f4f2ed?style=flat-square&amp;labelColor=29292d" alt="Interface: RU / EN">
 </p>
 
 <p align="center">
   <b>Записывай Suno. Собирай свою коллекцию.</b><br>
-  Полные треки, настоящие обложки и метаданные — в обычном Chrome или Edge.
+  Полные треки, настоящие обложки и метаданные — в привычном браузере.
 </p>
 
 <p align="center">
@@ -69,7 +69,7 @@ Suno Beast добавляет к Suno компактную панель запи
 
 ### 1. Скачать проект
 
-Скачай архив **Suno-Beast-v2.9.0.zip** на [странице последнего релиза](https://github.com/Lotargo/suno_beast/releases/latest) и распакуй его в постоянную папку. Исходники также доступны через **Code → Download ZIP** на [странице репозитория](https://github.com/Lotargo/suno_beast). Или используй Git:
+Скачай архив **Suno-Beast-v2.10.0.zip** на [странице последнего релиза](https://github.com/Lotargo/suno_beast/releases/latest) и распакуй его в постоянную папку. Исходники также доступны через **Code → Download ZIP** на [странице репозитория](https://github.com/Lotargo/suno_beast). Или используй Git:
 
 ```powershell
 git clone https://github.com/Lotargo/suno_beast.git

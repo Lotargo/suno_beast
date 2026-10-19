@@ -1,6 +1,6 @@
 # История изменений
 
-## Не выпущено
+## [2.10.0] — 2026-10-19
 
 ### Добавлено
 
@@ -29,4 +29,5 @@
 
 - Сгенерированный macOS-лаунчер `native/launch-host.sh` исключён из Git, как и локальные файлы Windows-помощника.
 
+[2.10.0]: https://github.com/Lotargo/suno_beast/releases/tag/v2.10.0
 [2.9.0]: https://github.com/Lotargo/suno_beast/releases/tag/v2.9.0

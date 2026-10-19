@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Suno Beast",
-  "version": "2.9.0",
+  "version": "2.10.0",
   "description": "Record audio from a Suno tab and process it locally with FFmpeg. Google login stays in your browser.",
   "minimum_chrome_version": "116",
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwnd76IlbrUxcIHoeWr50KK9M37LeUfhu9W4Bs3x4O15EF7pDfeJTIqNkOGwee0imHOo/Or2pCc3wCdLXHIeN6X9HBZluj/UDP+oBh2WukgtY2QzlCAfNFDJdpK1EpBx7ez6u4xIijnW2k972R1S53WmOIFxYs3Ul0QEp1fcUYEeUeD9BLhWddOtCygbv1OH2Y7GkXEegvBoolOzLB6sxuMpH763eg3/cAkmEblwfAbqUD6L1gh5YbYapbIWYlGTeaL4vI18rZ4vPweCbspwm3/eg4yEZMEYTUEUcrGfRatFJaPo0wJp9m68JhSSkVVJVwxkG5A7jgeZ6M2of6AH+4wIDAQAB",
