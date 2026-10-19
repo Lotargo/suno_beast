@@ -87,7 +87,8 @@ or sources/build-ffmpeg.sh, using the pinned LLVM-MinGW toolchain and verified s
 '@
 [IO.File]::WriteAllText((Join-Path $payload 'licenses\THIRD-PARTY-NOTICES.txt'), $noticeText, $utf8)
 [IO.File]::WriteAllText((Join-Path $payload 'native\launch-host.cmd'), "@echo off`r`n`"%~dp0..\runtime\node.exe`" `"%~dp0host.js`" %*`r`n", [Text.Encoding]::ASCII)
-foreach ($file in @('native\com.sunobeast.audio.json', 'installer-scope.txt', 'GettingStarted.txt')) { [IO.File]::WriteAllText((Join-Path $payload $file), '', $utf8) }
+# A UTF-16 BOM keeps Unicode registry paths intact through Windows INI APIs.
+[IO.File]::WriteAllText((Join-Path $payload 'registration-empty.ini'), '', [Text.Encoding]::Unicode)
 $runtimeInfo = @{ productVersion = $package.version; architecture = 'x64'; dependencies = $pins; binaries = @{} }
 foreach ($file in @('node.exe', 'ffmpeg.exe', 'ffprobe.exe')) { $runtimeInfo.binaries[$file] = (Get-FileHash -LiteralPath (Join-Path $payload "runtime\$file") -Algorithm SHA256).Hash.ToLowerInvariant() }
 [IO.File]::WriteAllText((Join-Path $payload 'runtime-info.json'), ($runtimeInfo | ConvertTo-Json -Depth 8), $utf8)

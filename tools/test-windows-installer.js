@@ -30,8 +30,16 @@ function registration(key) {
   return execFileSync(path.join(system32, 'WindowsPowerShell/v1.0/powershell.exe'), ['-NoProfile', '-Command', script], { encoding: 'utf8', windowsHide: true }).trim();
 }
 function setRegistration(key, value) { execFileSync(reg, ['add', key, '/ve', '/t', 'REG_SZ', '/d', value, '/f', '/reg:64'], { windowsHide: true }); }
-function install(label) {
-  return spawnSync(setup, ['/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/NOICONS', `/DIR=${app}`, `/SBTESTID=${scope}`, `/LOG=${path.join(root, label + '.log')}`], { env, windowsHide: true, encoding: 'utf8', timeout: 180000 });
+function install(label, directory = app, extra = []) {
+  const scopeArgs = extra.some(arg => arg.startsWith('/SBTESTID=')) ? [] : [`/SBTESTID=${scope}`];
+  return spawnSync(setup, ['/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/SP-', '/NOICONS', `/DIR=${directory}`, ...scopeArgs, `/LOG=${path.join(root, label + '.log')}`, ...extra], { env, windowsHide: true, encoding: 'utf8', timeout: 180000 });
+}
+async function uninstall(directory, label) {
+  const result = spawnSync(path.join(directory, 'unins000.exe'), ['/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', `/LOG=${path.join(root, label + '.log')}`], { env, encoding: 'utf8', windowsHide: true, timeout: 120000 });
+  assert.equal(result.status, 0, 'Uninstall failed');
+  // The uninstaller may hand work to a temporary copy.
+  for (let attempt = 0; attempt < 100 && fs.existsSync(path.join(directory, 'runtime/node.exe')); attempt++) await new Promise(resolve => setTimeout(resolve, 100));
+  assert.equal(fs.existsSync(path.join(directory, 'runtime/node.exe')), false);
 }
 function client(origin) {
   const child = spawn(path.join(system32, 'cmd.exe'), ['/d', '/s', '/c', `""${path.join(app, 'native/launch-host.cmd')}" "${origin}""`], { env, windowsHide: true, windowsVerbatimArguments: true, stdio: ['pipe', 'pipe', 'pipe'] });
@@ -61,20 +69,32 @@ async function main() {
   fs.mkdirSync(state); fs.mkdirSync(recordings);
   fs.writeFileSync(path.join(state, 'keep.json'), '{"preserve":true}');
   const foreign = 'C:\\Other application\\native-host.json';
-  setRegistration(edgeKey, foreign);
-  let result = install('conflict');
-  assert.notEqual(result.status, 0, 'Installer must reject an existing different host');
-  assert.equal(registration(edgeKey), foreign);
-  assert.equal(fs.existsSync(path.join(app, 'runtime/node.exe')), false);
-  execFileSync(reg, ['delete', edgeKey, '/f', '/reg:64'], { windowsHide: true });
-  mark('conflicting registration is preserved before files are installed');
+  const legacy = path.join(root, 'Прежняя копия', 'com.sunobeast.audio.json');
+  const stale = path.join(root, 'Removed copy', 'com.sunobeast.audio.json');
+  fs.mkdirSync(path.dirname(legacy)); fs.writeFileSync(legacy, '{"name":"com.sunobeast.audio"}');
+  setRegistration(chromeKey, legacy); setRegistration(edgeKey, stale);
+  execFileSync(reg, ['add', chromeKey, '/v', 'KeepMe', '/t', 'REG_SZ', '/d', 'unrelated-value', '/f', '/reg:64'], { windowsHide: true });
 
   fs.mkdirSync(app); fs.writeFileSync(path.join(app, 'existing-file.txt'), 'preserve');
-  result = install('occupied-folder'); assert.notEqual(result.status, 0);
+  let result = install('occupied-folder'); assert.notEqual(result.status, 0);
   assert.equal(fs.readFileSync(path.join(app, 'existing-file.txt'), 'utf8'), 'preserve');
   assert.equal(fs.existsSync(path.join(app, 'runtime/node.exe')), false);
+  assert.equal(registration(chromeKey), legacy); assert.equal(registration(edgeKey), stale);
   fs.unlinkSync(path.join(app, 'existing-file.txt')); fs.rmdirSync(app);
-  mark('unmanaged nonempty directories are preserved before installation');
+  mark('unmanaged nonempty directories and existing registrations are preserved before installation');
+
+  result = install('component-check', app, ['/SBTESTFAIL=missing-component']);
+  assert.notEqual(result.status, 0, 'Missing staged component must abort setup');
+  assert.equal(registration(chromeKey), legacy); assert.equal(registration(edgeKey), stale);
+  assert.equal(fs.existsSync(path.join(app, 'runtime/node.exe')), false);
+  mark('a missing bundled component aborts setup before changing registrations or copying files');
+
+  result = install('rollback', app, ['/SBTESTFAIL=after-first-registration']);
+  assert.notEqual(result.status, 0, 'Injected registration failure must abort setup');
+  assert.equal(registration(chromeKey), legacy); assert.equal(registration(edgeKey), stale);
+  assert.equal(fs.existsSync(path.join(app, 'runtime/node.exe')), false, 'Failed setup must roll back copied files');
+  assert.equal(fs.readFileSync(legacy, 'utf8'), '{"name":"com.sunobeast.audio"}');
+  mark('a failure after the first registration restores both previous paths and aborts before installing files');
 
   result = install('install');
   assert.equal(result.status, 0, `Setup failed: ${result.stderr}; log: ${path.join(root, 'install.log')}`);
@@ -83,6 +103,11 @@ async function main() {
   assert.equal(registration(edgeKey).toLowerCase(), manifestPath.toLowerCase());
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
   assert.equal(manifest.path, path.join(app, 'native/launch-host.cmd'));
+  const backup = fs.readFileSync(path.join(app, 'registration-backup.ini'));
+  assert.ok(backup.toString('utf16le').includes(legacy)); assert.ok(backup.toString('utf16le').includes(stale));
+  assert.equal(fs.readFileSync(legacy, 'utf8'), '{"name":"com.sunobeast.audio"}');
+  assert.match(execFileSync(reg, ['query', chromeKey, '/v', 'KeepMe', '/reg:64'], { encoding: 'utf8', windowsHide: true }), /unrelated-value/);
+  mark('existing and stale helper registrations automatically switch to the verified bundle with Unicode backups');
   const origin = manifest.allowed_origins[0];
   const node = path.join(app, 'runtime/node.exe'), ffprobe = path.join(app, 'runtime/ffprobe.exe');
   const selfCheck = JSON.parse(execFileSync(node, [path.join(app, 'native/self-check.js')], { env, windowsHide: true, encoding: 'utf8' }));
@@ -135,10 +160,16 @@ async function main() {
 
   fs.writeFileSync(path.join(app, 'keep-user-file.txt'), 'preserve');
   result = install('upgrade'); assert.equal(result.status, 0, 'Reinstall/upgrade failed');
+  assert.deepEqual(fs.readFileSync(path.join(app, 'registration-backup.ini')), backup, 'Upgrade must retain the original registration backup');
   assert.equal(fs.readFileSync(path.join(state, 'keep.json'), 'utf8'), '{"preserve":true}');
   const restarted = client(origin);
   try { assert.equal((await restarted.call('check-track', { track })).duplicate, true); } finally { await restarted.close(); }
-  mark('reinstall/upgrade preserves settings, recordings, collection and unrelated files');
+  mark('reinstall/upgrade preserves original registration backups, settings, recordings, collection and unrelated files');
+
+  result = install('wrong-scope', app, [`/SBTESTID=${crypto.randomUUID().replaceAll('-', '')}`]);
+  assert.notEqual(result.status, 0, 'A different test scope must not overwrite the installation');
+  assert.equal(registration(chromeKey), manifestPath);
+  mark('test scopes cannot overwrite an installation belonging to a different scope');
 
   // An incomplete bundle must not use a globally installed FFmpeg as fallback.
   fs.renameSync(path.join(app, 'runtime/ffmpeg.exe'), path.join(app, 'runtime/ffmpeg-test-disabled.exe'));
@@ -147,16 +178,23 @@ async function main() {
   fs.renameSync(path.join(app, 'runtime/ffmpeg-test-disabled.exe'), path.join(app, 'runtime/ffmpeg.exe'));
   mark('missing bundled FFmpeg fails clearly without a system fallback');
 
-  setRegistration(edgeKey, foreign);
-  const uninstaller = path.join(app, 'unins000.exe');
-  const removed = spawnSync(uninstaller, ['/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', `/LOG=${path.join(root, 'uninstall.log')}`], { env, encoding: 'utf8', windowsHide: true, timeout: 120000 });
-  assert.equal(removed.status, 0, 'Uninstall failed');
-  // The uninstaller may hand work to a temporary copy; wait for the owned files to go.
-  for (let attempt = 0; attempt < 100 && fs.existsSync(node); attempt++) await new Promise(resolve => setTimeout(resolve, 100));
-  assert.equal(fs.existsSync(node), false); assert.equal(registration(chromeKey), ''); assert.equal(registration(edgeKey), foreign);
+  await uninstall(app, 'uninstall');
+  assert.equal(registration(chromeKey), legacy); assert.equal(registration(edgeKey), '', 'Removed legacy paths must not be restored');
   assert.ok(fs.existsSync(saved.filePath)); assert.ok(fs.existsSync(path.join(state, 'keep.json')));
   assert.equal(fs.readFileSync(path.join(app, 'keep-user-file.txt'), 'utf8'), 'preserve');
-  mark('uninstall removes owned registrations and program files, preserving other registrations and user data');
+  mark('uninstall restores an existing legacy helper, removes a stale registration and preserves user data');
+
+  const replacement = path.join(root, 'Second installation');
+  try {
+    result = install('second-install', replacement); assert.equal(result.status, 0);
+    setRegistration(edgeKey, foreign);
+    await uninstall(replacement, 'second-uninstall');
+    assert.equal(registration(chromeKey), legacy); assert.equal(registration(edgeKey), foreign);
+    mark('uninstall preserves a registration changed by another installation after setup');
+  } finally {
+    const cleanup = path.join(replacement, 'unins000.exe');
+    if (fs.existsSync(cleanup)) spawnSync(cleanup, ['/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART'], { env, windowsHide: true, timeout: 120000 });
+  }
 }
 
 main().then(() => {
