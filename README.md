@@ -72,7 +72,7 @@ Suno Beast добавляет к Suno компактную панель запи
 
 ### Готовый установщик для Windows
 
-Выпуски с файлом `Suno-Beast-v…-Windows-x64-Setup.exe` содержат всё необходимое: отдельно устанавливать Node.js, npm, FFmpeg и ffprobe не нужно.
+Скачай [**Suno-Beast-v2.11.0-Windows-x64-Setup.exe**](https://github.com/Lotargo/suno_beast/releases/download/v2.11.0/Suno-Beast-v2.11.0-Windows-x64-Setup.exe). Установщик содержит всё необходимое: отдельно устанавливать Node.js, npm, FFmpeg и ffprobe не нужно.
 
 1. Запусти установщик и выбери папку программы. Установка выполняется для текущего пользователя.
 2. После завершения открой предложенную инструкцию и загрузи папку `extension` в браузер через режим разработчика.
@@ -88,7 +88,7 @@ Suno Beast добавляет к Suno компактную панель запи
 
 ### 1. Скачать проект
 
-Скачай архив **Suno-Beast-v2.10.0.zip** на [странице последнего релиза](https://github.com/Lotargo/suno_beast/releases/latest) и распакуй его в постоянную папку. Исходники также доступны через **Code → Download ZIP** на [странице репозитория](https://github.com/Lotargo/suno_beast). Или используй Git:
+Скачай [**Suno-Beast-v2.11.0.zip**](https://github.com/Lotargo/suno_beast/releases/download/v2.11.0/Suno-Beast-v2.11.0.zip) на [странице последнего релиза](https://github.com/Lotargo/suno_beast/releases/latest) и распакуй его в постоянную папку. Исходники также доступны через **Code → Download ZIP** на [странице репозитория](https://github.com/Lotargo/suno_beast). Или используй Git:
 
 ```powershell
 git clone https://github.com/Lotargo/suno_beast.git
