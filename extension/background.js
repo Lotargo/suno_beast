@@ -33,7 +33,13 @@ function native(type, data = {}) {
     catch (err) { clearTimeout(timer); pending.delete(id); reject(err); }
   });
 }
+function requireOffscreen() {
+  if (typeof chrome.runtime.getContexts !== 'function' || typeof chrome.offscreen?.createDocument !== 'function') {
+    throw new Error('Эта версия браузера не поддерживает фоновую обработку аудио. Обнови браузер.');
+  }
+}
 async function offscreen(type, data = {}) {
+  requireOffscreen();
   const contexts = await chrome.runtime.getContexts({ contextTypes: ['OFFSCREEN_DOCUMENT'] });
   if (!contexts.length) {
     creatingOffscreen ||= chrome.offscreen.createDocument({ url: 'offscreen.html', reasons: ['USER_MEDIA', 'BLOBS'], justification: 'Record and save audio from a user-selected Suno tab' }).finally(() => { creatingOffscreen = null; });
@@ -92,6 +98,10 @@ function requestMetadata(tabId, force = false) {
 async function start(auto, opts, tabId) {
   if (capturedTab !== null || state.processing || state.settingsBusy) throw new Error('Дождись завершения текущей операции');
   const tab = await activeSuno(tabId);
+  if (typeof chrome.tabCapture?.getMediaStreamId !== 'function') {
+    throw new Error('Эта версия браузера не поддерживает запись звука вкладки. Обнови браузер.');
+  }
+  requireOffscreen();
   const status = await native('status'); Object.assign(state, status);
   if (!auto) {
     const existing = await native('check-track', { track: tracks.get(tab.id)?.track });
@@ -211,6 +221,7 @@ async function handle(message, sender) {
   }
   if (message.type === 'grab') {
     if (state.processing || state.settingsBusy || capturedTab !== null) throw new Error('Останови запись и дождись завершения обработки');
+    requireOffscreen();
     const tab = await activeSuno(uiTabId); const track = tracks.get(tab.id)?.track;
     if (!SunoPolicy.isAudioUrl(track?.audio_src)) throw new Error('Запусти трек: ссылка на MP3 ещё не обнаружена');
     state.processing = true; state.error = '';

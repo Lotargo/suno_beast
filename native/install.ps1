@@ -1,4 +1,7 @@
+param([string]$RegistryRoot = 'HKCU:\Software')
 $ErrorActionPreference = 'Stop'
+# Opera, Opera GX and Yandex Browser use the Chrome registration on Windows.
+$vendors = @('Google\Chrome', 'Microsoft\Edge')
 $hostDir = $PSScriptRoot
 $projectDir = Split-Path -Parent $hostDir
 $nodePath = (Get-Command node.exe -ErrorAction Stop).Source
@@ -19,19 +22,19 @@ $hostData = @{
     allowed_origins = @("chrome-extension://$extensionId/")
 } | ConvertTo-Json
 [IO.File]::WriteAllText($hostManifest, $hostData, [Text.UTF8Encoding]::new($false))
-foreach ($vendor in @('Google\Chrome', 'Microsoft\Edge')) {
-    $registryPath = "HKCU:\Software\$vendor\NativeMessagingHosts\com.sunobeast.audio"
+foreach ($vendor in $vendors) {
+    $registryPath = "$RegistryRoot\$vendor\NativeMessagingHosts\com.sunobeast.audio"
     if (Test-Path -LiteralPath $registryPath) {
         $existing = (Get-Item -LiteralPath $registryPath).GetValue('')
         if ($existing -and $existing -ne $hostManifest) { throw "A different host is already registered: $existing" }
     }
 }
-foreach ($vendor in @('Google\Chrome', 'Microsoft\Edge')) {
-    $registryPath = "HKCU:\Software\$vendor\NativeMessagingHosts\com.sunobeast.audio"
+foreach ($vendor in $vendors) {
+    $registryPath = "$RegistryRoot\$vendor\NativeMessagingHosts\com.sunobeast.audio"
     New-Item -Path $registryPath -Force | Out-Null
     Set-Item -LiteralPath $registryPath -Value $hostManifest
 }
-Write-Host "Local audio helper registered for Chrome and Edge."
+Write-Host "Local audio helper registered for Chrome, Edge, Opera, Opera GX and Yandex Browser."
 Write-Host "Extension folder: $(Join-Path $projectDir 'extension')"
 Write-Host "Extension ID: $extensionId"
-Write-Host 'Load this folder using Load unpacked on chrome://extensions or edge://extensions.'
+Write-Host 'Load this folder using Load unpacked on chrome://extensions, edge://extensions, opera://extensions or browser://extensions.'

@@ -40,8 +40,9 @@ node tools/preview-popup.js
 
 ## Локальные файлы
 
-- `npm run install:helper` запускает `native/install.js`: на Windows он вызывает `native/install.ps1`, на macOS регистрирует помощник в пользовательских папках Native Messaging для Chrome и Edge. Linux не поддерживается.
-- На Windows установщик создаёт `native/launch-host.cmd` и `native/com.sunobeast.audio.json`; на macOS — исполняемый `native/launch-host.sh` и манифесты в `~/Library/Application Support/Google/Chrome/NativeMessagingHosts` и `~/Library/Application Support/Microsoft Edge/NativeMessagingHosts`. Лаунчеры содержат пути текущего компьютера и исключены из Git.
+- `npm run install:helper` запускает `native/install.js`: на Windows он вызывает `native/install.ps1`, на macOS регистрирует помощник в пользовательских папках Native Messaging для Chrome, Edge и Яндекс Браузера. Opera и Opera GX используют регистрацию Chrome; Яндекс Браузер на Windows также читает регистрацию Chrome. Linux не поддерживается.
+- На Windows установщик создаёт `native/launch-host.cmd` и `native/com.sunobeast.audio.json`, затем регистрирует их в `HKCU:\Software\{Google\Chrome,Microsoft\Edge}\NativeMessagingHosts\com.sunobeast.audio`; на macOS — исполняемый `native/launch-host.sh` и манифесты в подкаталогах `NativeMessagingHosts` внутри `~/Library/Application Support/{Google/Chrome,Microsoft Edge,Yandex/YandexBrowser}`. Лаунчеры содержат пути текущего компьютера и исключены из Git.
+- Windows-тест установки и удаления использует отдельный ключ `HKCU:\Software\SunoBeastInstallTests\<UUID>` через параметр `-RegistryRoot`; действующие регистрации браузеров не меняются. Удаление помощника сохраняет регистрации другой копии проекта.
 - На macOS в лаунчере сохраняются абсолютный путь к Node.js и каталоги FFmpeg/ffprobe в `PATH`, чтобы помощник работал при запуске браузера из Finder. После переноса проекта или инструментов нужно повторить установку.
 - Настройки, индекс коллекции и временные готовые файлы находятся в `%LOCALAPPDATA%\SunoBeast` на Windows или `~/Library/Application Support/SunoBeast` на macOS. Готовые файлы для доставки браузеру находятся в подкаталоге `pending`.
 - При ошибке FFmpeg исходник сохраняется как `Recovery_*.webm` в выбранной папке либо в подкаталоге `recovery` каталога состояния.

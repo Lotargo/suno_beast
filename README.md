@@ -48,11 +48,20 @@ Suno Beast добавляет к Suno компактную панель запи
 
 ## Совместимость
 
-**Расширение создавалось на Windows.** Предназначено для Chrome и Edge. Установка локального помощника поддерживает Windows и macOS; Linux не поддерживается.
+**Основные браузеры — Chrome и Edge.** Установка локального помощника поддерживает Windows и macOS; Linux не поддерживается.
+
+| Браузер | Статус |
+| :--- | :--- |
+| Chrome, Edge | Основные браузеры проекта. Работа на macOS подтверждена автором macOS-исправления. |
+| Opera, Opera GX | Экспериментальная совместимость: тот же пакет расширения, регистрация помощника через Chrome. Нужна проверка реальной записи в каждом браузере. |
+| Яндекс Браузер | Экспериментальная совместимость: на Windows проверены API, фоновый документ и связь с помощником. Нужна проверка реальной записи; на macOS добавлена регистрация помощника. |
+| Firefox, Safari | Пока не поддерживаются; требуют отдельного переноса механизма записи и связи с помощником. |
+
+Наличие Chromium в основе браузера само по себе не гарантирует работу записи. Нужны API захвата звука вкладки и фонового документа; при их отсутствии расширение покажет понятную ошибку. Подробности и порядок проверки — в [матрице совместимости](docs/BROWSER_COMPATIBILITY.md).
 
 Для работы нужны:
 
-- **Chrome или Edge 116+**. Рекомендуется актуальная версия; оформление списка форматов поддерживается начиная с Chromium 135.
+- **Chrome или Edge 116+** либо актуальная версия Opera, Opera GX или Яндекс Браузера для экспериментальной проверки. Оформление списка форматов поддерживается начиная с Chromium 135.
 - **[Node.js](https://nodejs.org/en/download)** с npm.
 - **[FFmpeg и ffprobe](https://ffmpeg.org/download.html)**, доступные в `PATH`.
 
@@ -86,11 +95,11 @@ ffprobe -version
 npm run install:helper
 ```
 
-Команда определяет платформу и регистрирует локальный аудиопомощник для Chrome и Edge. На macOS она записывает манифесты в `~/Library/Application Support/Google/Chrome/NativeMessagingHosts` и `~/Library/Application Support/Microsoft Edge/NativeMessagingHosts`. Права администратора не нужны. Помощник запускается браузером по необходимости через [Native Messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging). После установки перезапусти браузер.
+Команда определяет платформу и регистрирует локальный аудиопомощник для Chrome и Edge, а на macOS — также для Яндекс Браузера. Opera, Opera GX и Яндекс Браузер на Windows используют регистрацию Chrome — устанавливать сам Chrome для этого не нужно. На macOS манифесты находятся в `~/Library/Application Support/Google/Chrome/NativeMessagingHosts`, `~/Library/Application Support/Microsoft Edge/NativeMessagingHosts` и `~/Library/Application Support/Yandex/YandexBrowser/NativeMessagingHosts`. Права администратора не нужны. Помощник запускается браузером по необходимости через [Native Messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging). После установки перезапусти браузер.
 
 ### 3. Загрузить расширение в браузер
 
-1. Открой `chrome://extensions` в Chrome или `edge://extensions` в Edge.
+1. Открой `chrome://extensions` в Chrome, `edge://extensions` в Edge, `opera://extensions` в Opera / Opera GX или `browser://extensions` в Яндекс Браузере.
 2. Включи **Режим разработчика**.
 3. Нажми **Загрузить распакованное расширение**.
 4. Выбери **папку `extension` внутри проекта** — в ней находится `manifest.json`.

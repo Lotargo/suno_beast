@@ -1,7 +1,8 @@
+param([string]$RegistryRoot = 'HKCU:\Software')
 $ErrorActionPreference = 'Stop'
 $ownedManifest = Join-Path $PSScriptRoot 'com.sunobeast.audio.json'
 foreach ($vendor in @('Google\Chrome', 'Microsoft\Edge')) {
-    $registryPath = "HKCU:\Software\$vendor\NativeMessagingHosts\com.sunobeast.audio"
+    $registryPath = "$RegistryRoot\$vendor\NativeMessagingHosts\com.sunobeast.audio"
     if ((Test-Path -LiteralPath $registryPath) -and (Get-Item -LiteralPath $registryPath).GetValue('') -eq $ownedManifest) {
         Remove-Item -LiteralPath $registryPath -Force
     }

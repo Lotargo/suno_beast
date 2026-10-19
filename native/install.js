@@ -5,7 +5,8 @@ const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
 const hostName = 'com.sunobeast.audio';
-const vendors = ['Google/Chrome', 'Microsoft Edge'];
+// Opera and Opera GX use Chrome's Native Messaging registration.
+const vendors = ['Google/Chrome', 'Microsoft Edge', 'Yandex/YandexBrowser'];
 
 function executable(name, env = process.env) {
   for (const directory of (env.PATH || '').split(path.delimiter)) {
@@ -63,7 +64,7 @@ function main(platform = process.platform) {
   }
   if (platform === 'darwin') {
     const result = installMac();
-    process.stdout.write(`Local audio helper registered for Chrome and Edge.\nExtension ID: ${result.extensionId}\nLoad ${path.join(__dirname, '..', 'extension')} using Load unpacked, then restart the browser.\n`);
+    process.stdout.write(`Local audio helper registered for Chrome, Edge, Opera, Opera GX and Yandex Browser.\nExtension ID: ${result.extensionId}\nLoad ${path.join(__dirname, '..', 'extension')} using Load unpacked, then restart the browser.\n`);
     return;
   }
   throw new Error(`unsupported platform: ${platform}; supported platforms are Windows and macOS`);

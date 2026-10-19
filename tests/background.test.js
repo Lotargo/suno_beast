@@ -86,6 +86,39 @@ test('Auto-Grab cannot silently arm without a functioning content handshake', as
   assert.match(status.data.pageError, /Нет связи со вкладкой Suno/); assert.equal(status.data.error, '', 'recovered page errors must not become sticky encoder errors');
 });
 
+test('missing browser recording APIs fail clearly before helper access or capture', async () => {
+  for (const missing of ['tabCapture', 'offscreen', 'getContexts']) {
+    let listener, helperCalls = 0, captureCalls = 0;
+    const hook = { addListener() {} };
+    const chrome = {
+      action: { onClicked: hook },
+      runtime: { onMessage: { addListener(fn) { listener = fn; } }, getURL: file => `chrome-extension://test/${file}`,
+        connectNative() { helperCalls++; throw new Error('Unexpected helper access'); }, async getContexts() { return []; } },
+      tabs: { onRemoved: hook, onUpdated: hook, async query() { return [{ id: 7, url: 'https://suno.com/me' }]; },
+        async sendMessage() { return { playing: true, currentTime: 0, track: { title: 'Synthetic song' } }; } },
+      offscreen: { async createDocument() { throw new Error('Unexpected offscreen creation'); } },
+      tabCapture: { async getMediaStreamId() { captureCalls++; } }, webRequest: { onCompleted: hook }
+    };
+    if (missing === 'getContexts') delete chrome.runtime.getContexts; else delete chrome[missing];
+    const context = vm.createContext({ importScripts() {}, chrome, SunoPanelSessions: require('../extension/panel-session'),
+      SunoConnection: require('../extension/connection'), SunoPolicy: policy,
+      SunoEnrichment: { createEnricher: () => ({ peek() {}, load: () => new Promise(() => {}) }) } });
+    vm.runInContext(fs.readFileSync(path.join(__dirname, '../extension/background.js'), 'utf8'), context);
+    const sender = { url: 'chrome-extension://test/popup.html' };
+    const send = type => new Promise(resolve => listener({ target: 'background', type }, sender, resolve));
+    const result = await send('toggle-auto');
+    assert.equal(result.ok, false, missing);
+    assert.match(result.error, /Эта версия браузера не поддерживает/);
+    assert.equal(helperCalls, 0); assert.equal(captureCalls, 0);
+    assert.equal((await send('playback-status')).data.auto, false);
+    if (missing !== 'tabCapture') {
+      const direct = await send('grab');
+      assert.equal(direct.ok, false); assert.match(direct.error, /фоновую обработку аудио/);
+      assert.equal(helperCalls, 0);
+    }
+  }
+});
+
 test('folder action opens the browser default Downloads folder or the custom native folder according to saved mode', async () => {
   let listener, portListener, mode = 'browser', browserOpens = 0, helperOpens = 0;
   const hook = { addListener() {} };

@@ -102,6 +102,8 @@
     'Оборванная запись отброшена; ждём трек с начала': 'Interrupted recording discarded; waiting for a track to start',
     'Незавершённая запись отброшена': 'Incomplete recording discarded',
     'Захват уже включён': 'Audio capture is already active',
+    'Эта версия браузера не поддерживает фоновую обработку аудио. Обнови браузер.': 'This browser version does not support background audio processing. Update your browser.',
+    'Эта версия браузера не поддерживает запись звука вкладки. Обнови браузер.': 'This browser version does not support tab audio recording. Update your browser.',
     'Недопустимый файл загрузки': 'Invalid download file',
     'Загрузка отменена или прервана. Готовый файл оставлен у помощника.': 'Download cancelled or interrupted. The recording helper has kept the completed file.',
     'Истекло время сохранения. Готовый файл оставлен у помощника.': 'Saving timed out. The recording helper has kept the completed file.',

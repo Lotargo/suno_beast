@@ -12,6 +12,8 @@ test('RU/EN translates only UI templates, preserving metadata, paths and unknown
   assert.equal(i.message('Ошибка сохранения: Неполный готовый файл Файл: D:\\Музыка\\Запись.mp3'), 'Save error: The completed file is incomplete File: D:\\Музыка\\Запись.mp3');
   assert.equal(i.message('Ошибка сохранения: Захват уже включён. Не удалось сохранить резервную копию.'), 'Save error: Audio capture is already active. Could not save a backup.');
   assert.equal(i.message('Unknown OS error 42'), 'Unknown OS error 42');
+  assert.equal(i.message('Эта версия браузера не поддерживает запись звука вкладки. Обнови браузер.'), 'This browser version does not support tab audio recording. Update your browser.');
+  assert.equal(i.message('Эта версия браузера не поддерживает фоновую обработку аудио. Обнови браузер.'), 'This browser version does not support background audio processing. Update your browser.');
   assert.equal(i.setLanguage('de'), 'ru');
   assert.equal(i.t('Записать'), 'Записать');
   assert.equal(i.message('Уже в коллекции: Запись.mp3'), 'Уже в коллекции: Запись.mp3');
